@@ -20,7 +20,7 @@
   font-size: 22px; /* 30% smaller than 32px */
   font-family: 'Great Vibes', cursive; /* Calligraphic font */
   font-style: normal; /* Great Vibes is already italic, so reset explicit italic */
-  text-indent: -10px; /* Move 'N' 10px to the left */
+  text-indent: -5px; /* Shift 'N' 5px to the right from its current -10px position */
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
