@@ -150,6 +150,16 @@ function createNote(noteData) {
   // Track this note in our array
   notes.push(noteElement);
 
+  // Add click listener for collapsed state to expand
+  noteElement.addEventListener('click', (e) => {
+    // Only expand if the note is collapsed
+    if (noteElement.classList.contains('collapsed')) {
+      e.stopPropagation(); // Prevent drag-related events or other elements from reacting
+      noteElement.classList.remove('collapsed');
+      saveAllNotes();
+    }
+  });
+
   // Enable dragging with position saving
   makeDraggable(noteElement, header);
 }

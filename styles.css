@@ -109,21 +109,21 @@
     box-sizing: border-box; /* Include padding in width */
 }
 
-/* Collapsed state for the note */
+/* Hide content when collapsed */
+.my-extension-note.collapsed .my-extension-textarea,
+.my-extension-note.collapsed .my-extension-close,
+.my-extension-note.collapsed .my-extension-min { /* Re-hide minimize */
+  display: none;
+}
+
 .my-extension-note.collapsed {
-  width: 40px !important; /* Force small width */
-  height: 40px !important; /* Force small height */
-  min-width: 40px !important;
-  min-height: 40px !important;
+  width: 30px !important; /* Make it much smaller */
+  height: 30px !important; /* Make it much smaller */
+  min-width: 30px !important;
+  min-height: 30px !important;
   border-radius: 50%; /* Make it a circle */
   transition: all 0.2s ease-in-out; /* Smooth transition */
   box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Smaller shadow when collapsed */
-}
-
-/* Hide content when collapsed */
-.my-extension-note.collapsed .my-extension-textarea,
-.my-extension-note.collapsed .my-extension-close {
-  display: none;
 }
 
 .my-extension-note.collapsed .my-extension-header {
