@@ -18,7 +18,7 @@
 }
 
 /* The actual Sticky Note Container */
-#my-extension-note {
+.my-extension-note {
   position: absolute;
   top: 50px;
   right: 50px;
@@ -35,7 +35,7 @@
 }
 
 /* The dark bar at the top used to drag the note */
-#my-extension-header {
+.my-extension-header {
   height: 30px;
   background-color: #e6de3a; /* Slightly darker yellow */
   cursor: move; /* Shows the 'move' icon on hover */
@@ -46,21 +46,41 @@
 }
 
 /* The close button (X) */
-#my-extension-close {
+.my-extension-close {
   cursor: pointer;
   font-weight: bold;
   color: #555;
   padding: 0 5px;
 }
 
-/* The area where you type */
-#my-extension-textarea {
-  flex-grow: 1;
-  border: none;
-  background-color: transparent;
-  resize: none; /* Disables standard resize handle */
-  padding: 10px;
-  outline: none;
-  font-size: 14px;
-  color: #333;
+/* The minimize button (-) */
+.my-extension-min {
+  cursor: pointer;
+  font-weight: bold;
+  color: #555;
+  padding: 0 5px;
+  margin-right: 5px; /* Space between minimize and close */
+}
+
+/* Collapsed state for the note */
+.my-extension-note.collapsed {
+  width: 20px !important; /* Force small width */
+  height: 20px !important; /* Force small height */
+  min-width: 20px !important;
+  min-height: 20px !important;
+  border-radius: 50%; /* Make it a circle */
+  transition: all 0.2s ease-in-out; /* Smooth transition */
+}
+
+/* Hide content when collapsed */
+.my-extension-note.collapsed .my-extension-textarea,
+.my-extension-note.collapsed .my-extension-close {
+  display: none;
+}
+
+.my-extension-note.collapsed .my-extension-header {
+  justify-content: center; /* Center the minimize button */
+  height: 100%;
+  padding: 0;
+  border-radius: 50%;
 }

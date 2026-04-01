@@ -27,8 +27,9 @@ function saveAllNotes() {
   const notesData = notes.map(noteEl => ({
     id: noteEl.dataset.noteId,
     text: noteEl.querySelector('textarea').value,
-    top: noteEl.style.top || '100px',
-    left: noteEl.style.left || '100px'
+    top: noteEl.style.top,
+    left: noteEl.style.left,
+    isCollapsed: noteEl.classList.contains('collapsed')
   }));
   chrome.storage.local.set({ [currentUrl]: notesData });
 }
@@ -44,12 +45,16 @@ function createFloatingButton() {
   btn.innerHTML = "📝";
   
   btn.onclick = () => {
+    const btnRect = btn.getBoundingClientRect();
+    const newNoteTop = (btnRect.top + window.scrollY - 190) + "px"; // 30px above + 100px higher + 60px higher
+    const newNoteLeft = (btnRect.left + window.scrollX - 200) + "px"; // 100px to the left + 100px to the left
+
     // Create a new note with unique ID and default position
     const newNoteData = {
       id: generateId(),
       text: "",
-      top: "100px",
-      left: "100px"
+      top: newNoteTop,
+      left: newNoteLeft
     };
     createNote(newNoteData);
     saveAllNotes();
@@ -64,8 +69,9 @@ function createNote(noteData) {
   const { 
     id = generateId(), 
     text = "", 
-    top = "100px", 
-    left = "100px" 
+    top, 
+    left,
+    isCollapsed = false // Default to not collapsed
   } = safeData;
 
   // Create the main container (using class instead of ID for multiple notes)
@@ -82,6 +88,9 @@ function createNote(noteData) {
   noteElement.style.borderRadius = "6px";
   noteElement.style.overflow = "hidden";
   noteElement.style.fontFamily = "sans-serif";
+  if (isCollapsed) {
+    noteElement.classList.add('collapsed');
+  }
 
   // Create the header (for dragging)
   const header = document.createElement("div");
@@ -102,18 +111,17 @@ function createNote(noteData) {
     noteElement.remove();
     saveAllNotes();
   };
-  /*
+
+  // Create minimize button
   const minBtn = document.createElement("span");
-  closeBtn.className = "my-extension-min";
-  closeBtn.innerHTML = "-";
-  closeBtn.style.cursor = "pointer";
-  closeBtn.onclick = () => {
-    // Remove from notes array and DOM
-    notes = notes.filter(n => n !== noteElement);
-    noteElement.remove();
+  minBtn.className = "my-extension-min";
+  minBtn.innerHTML = "-";
+  minBtn.style.cursor = "pointer";
+  minBtn.onclick = (e) => {
+    e.stopPropagation(); // Prevent drag from minimizing/expanding
+    noteElement.classList.toggle('collapsed');
     saveAllNotes();
   };
-  */
 
   // Create the text area
   const textarea = document.createElement("textarea");
@@ -133,6 +141,7 @@ function createNote(noteData) {
   });
 
   // Assemble the pieces
+  header.appendChild(minBtn);
   header.appendChild(closeBtn);
   noteElement.appendChild(header);
   noteElement.appendChild(textarea);
