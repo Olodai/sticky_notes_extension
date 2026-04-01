@@ -17,7 +17,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px; /* Increased font size */
+  font-size: 22px; /* 30% smaller than 32px */
   font-family: 'Great Vibes', cursive; /* Calligraphic font */
   font-style: normal; /* Great Vibes is already italic, so reset explicit italic */
   text-indent: -10px; /* Move 'N' 10px to the left */
@@ -117,10 +117,10 @@
 }
 
 .my-extension-note.collapsed {
-  width: 30px !important; /* Make it much smaller */
-  height: 30px !important; /* Make it much smaller */
-  min-width: 30px !important;
-  min-height: 30px !important;
+  width: 24px !important; /* Make it much smaller */
+  height: 24px !important; /* Make it much smaller */
+  min-width: 24px !important;
+  min-height: 24px !important;
   border-radius: 50%; /* Make it a circle */
   transition: all 0.2s ease-in-out; /* Smooth transition */
   box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Smaller shadow when collapsed */
