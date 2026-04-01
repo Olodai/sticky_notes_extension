@@ -42,7 +42,7 @@ function createFloatingButton() {
   
   const btn = document.createElement("div");
   btn.id = "my-extension-float-btn";
-  btn.innerHTML = "📝";
+  btn.innerHTML = "N";
   
   btn.onclick = () => {
     const btnRect = btn.getBoundingClientRect();
