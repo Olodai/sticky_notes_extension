@@ -142,8 +142,8 @@
 }
 
 .my-extension-note.collapsed {
-  width: 12px !important;
-  height: 12px !important;
+  width: 16px !important;
+  height: 16px !important;
   min-width: 12px !important;
   min-height: 12px !important;
   border-radius: 12px;
