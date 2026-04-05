@@ -1,10 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "My Personal Sticky Notes",
+  "name": "Sift",
   "version": "1.0",
-  "description": "Embeds sticky notes into websites.",
+  "description": "Annotate any website with beautiful, persistent sticky notes. Keep your research organized.",
   "permissions": [
-    "storage"
+    "storage",
+    "tabs"
   ],
   "content_scripts": [
     {
@@ -12,5 +13,10 @@
       "js": ["content.js"],
       "css": ["styles.css"]
     }
-  ]
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Sift - View all annotated sites",
+    "default_icon": "icon.svg"
+  }
 }
