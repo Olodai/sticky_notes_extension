@@ -1,31 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* The floating button to open a note */
 #my-extension-float-btn {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 50px;
-  height: 50px;
-  background-color: #9B70E0; /* Lavender purple */
-  color: white; /* Icon color */
-  border: 3px solid #6A3A9F; /* Darker purple border */
-  border-radius: 50%;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #c2e5d3 0%, #a8d9bf 100%);
+  color: #1E1E2E;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(194, 229, 211, 0.3);
   cursor: pointer;
   z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px; /* 30% smaller than 32px */
-  font-family: 'Great Vibes', cursive; /* Calligraphic font */
-  font-style: normal; /* Great Vibes is already italic, so reset explicit italic */
-  text-indent: -5px; /* Shift 'N' 5px to the right from its current -10px position */
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  font-size: 24px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #my-extension-float-btn:hover {
-  background-color: #8B60D0; /* Slightly darker on hover */
+  background: linear-gradient(135deg, #d4f0e1 0%, #c2e5d3 100%);
+  box-shadow: 0 12px 32px rgba(194, 229, 211, 0.4);
+  transform: translateY(-2px);
+}
+
+#my-extension-float-btn:active {
+  transform: translateY(0);
 }
 
 /* The actual Sticky Note Container */
@@ -33,33 +38,35 @@
   position: absolute;
   top: 50px;
   right: 50px;
-  width: 250px;
-  min-height: 150px; /* Adjusted for cleaner look */
-  background-color: #EBE0FA; /* Light lavender purple */
-  box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+  width: 320px;
+  min-height: 200px;
+  background-color: #c2e5d3; /* Mint green background */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   z-index: 1000000;
   display: flex;
   flex-direction: column;
-  border-radius: 8px; /* Softer rounded corners */
+  border-radius: 12px;
   overflow: hidden;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
-  color: #4E415F; /* Dark text for readability */
-  resize: both; /* Allow resizing */
-  min-width: 200px;
-  max-width: 400px;
-  max-height: 500px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #1E1E2E;
+  resize: both;
+  min-width: 240px;
+  max-width: 480px;
+  max-height: 600px;
+  border: 1px solid #304529;
 }
 
 /* The dark bar at the top used to drag the note */
 .my-extension-header {
-  height: 35px; /* Slightly taller header */
-  background-color: #C2A2ED; /* Medium lavender purple */
-  cursor: grab; /* Shows the 'grab' icon on hover */
+  height: 20px;
+  background-color: #c2e5d3;
+  cursor: grab;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  padding: 0 10px;
-  border-bottom: 1px solid rgba(0,0,0,0.1); /* Subtle separator */
+  padding: 0 12px;
+  border-bottom: 1px solid #304529;
+  gap: 8px;
 }
 
 /* Cursor change when dragging */
@@ -70,66 +77,86 @@
 /* The close button (X) */
 .my-extension-close {
   cursor: pointer;
-  font-weight: bold;
-  color: #4E415F;
-  font-size: 18px;
-  margin-left: 10px;
-  transition: color 0.2s ease;
+  font-weight: 600;
+  color: #304529;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
 }
 
 .my-extension-close:hover {
-  color: #FF0000; /* Red on hover for close */
+  color: #EF4444;
+  background-color: rgba(239, 68, 68, 0.15);
 }
 
 /* The minimize button (-) */
 .my-extension-min {
   cursor: pointer;
-  font-weight: bold;
-  color: #4E415F;
-  font-size: 18px;
-  transition: color 0.2s ease;
+  font-weight: 600;
+  color: #304529;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
 }
 
 .my-extension-min:hover {
-  color: #007bff; /* Blue on hover for minimize */
+  color: #0369a1;
+  background-color: rgba(3, 105, 161, 0.15);
 }
 
 /* Content area for the note text */
 .my-extension-textarea {
     flex-grow: 1;
-    padding: 10px;
+    padding: 12px;
     border: none;
-    background-color: #EBE0FA; /* Match main note background */
+    background-color: #c2e5d3;
     font-size: 14px;
-    line-height: 1.5;
-    color: #4E415F;
-    resize: none; /* Handled by parent */
+    line-height: 1.6;
+    color: #1E1E2E;
+    resize: none;
     outline: none;
-    width: 100%; /* Ensure it fills the container */
-    box-sizing: border-box; /* Include padding in width */
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.my-extension-textarea::placeholder {
+  color: #7a9f8f;
 }
 
 /* Hide content when collapsed */
 .my-extension-note.collapsed .my-extension-textarea,
 .my-extension-note.collapsed .my-extension-close,
-.my-extension-note.collapsed .my-extension-min { /* Re-hide minimize */
+.my-extension-note.collapsed .my-extension-min {
   display: none;
 }
 
 .my-extension-note.collapsed {
-  width: 24px !important; /* Make it much smaller */
-  height: 24px !important; /* Make it much smaller */
-  min-width: 24px !important;
-  min-height: 24px !important;
-  border-radius: 50%; /* Make it a circle */
-  transition: all 0.2s ease-in-out; /* Smooth transition */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Smaller shadow when collapsed */
+  width: 12px !important;
+  height: 12px !important;
+  min-width: 12px !important;
+  min-height: 12px !important;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 24px rgba(194, 229, 211, 0.3);
+  border: 1px solid #304529;
 }
 
 .my-extension-note.collapsed .my-extension-header {
-  justify-content: center; /* Center the header content (which will be empty or a small icon) */
+  justify-content: center;
   height: 100%;
   padding: 0;
-  border-radius: 50%;
-  background-color: #9B70E0; /* Use main float button color when collapsed */
+  border-radius: 12px;
+  background: linear-gradient(135deg, #c2e5d3 0%, #a8d9bf 100%);
+  border: none;
 }
