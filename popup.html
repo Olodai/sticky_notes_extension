@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Notes</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1>My Notes</h1>
+      <p class="subtitle">All annotated sites</p>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Search notes or URLs..."
+      >
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-number" id="totalSites">0</span>
+        <span class="stat-label">Sites</span>
+      </div>
+      <div class="stat">
+        <span class="stat-number" id="totalNotes">0</span>
+        <span class="stat-label">Notes</span>
+      </div>
+    </div>
+
+    <!-- Sites List -->
+    <div class="sites-container" id="sitesContainer">
+      <div class="empty-state">
+        <div class="empty-icon">📝</div>
+        <p>No notes yet</p>
+        <small>Visit any website and click the green button to start annotating</small>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <button id="exportBtn" class="footer-btn export-btn" title="Export all notes as JSON">
+        <span class="btn-icon">⬇️</span> Export
+      </button>
+      <button id="clearBtn" class="footer-btn clear-btn" title="Clear all notes (cannot be undone)">
+        <span class="btn-icon">🗑️</span> Clear All
+      </button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

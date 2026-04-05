@@ -5,22 +5,24 @@
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 56px;
-  height: 56px;
+  width: 42px;
+  height: 42px;
   background: linear-gradient(135deg, #c2e5d3 0%, #a8d9bf 100%);
   color: #1E1E2E;
   border: none;
-  border-radius: 12px;
+  border-radius: 9px;
   box-shadow: 0 8px 24px rgba(194, 229, 211, 0.3);
   cursor: pointer;
   z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-weight: 600;
+  font-size: 20px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 700;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0;
+  line-height: 1;
 }
 
 #my-extension-float-btn:hover {
@@ -142,8 +144,8 @@
 }
 
 .my-extension-note.collapsed {
-  width: 12px !important;
-  height: 12px !important;
+  width: 16px !important;
+  height: 16px !important;
   min-width: 12px !important;
   min-height: 12px !important;
   border-radius: 12px;
