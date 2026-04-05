@@ -1,4 +1,4 @@
-# My Personal Sticky Notes
+# Sift
 
 A lightweight, privacy-first Chrome extension that lets you annotate any webpage with persistent sticky notes. Jot down ideas, reminders, and quick thoughts without breaking your browsing flow.
 
@@ -9,7 +9,7 @@ A lightweight, privacy-first Chrome extension that lets you annotate any webpage
 
 ## Overview
 
-**My Personal Sticky Notes** is a distraction-free note-taking extension designed for researchers, students, developers, and anyone who needs to capture thoughts while browsing. Unlike complex note management systems, this extension focuses on **speed, simplicity, and privacy**.
+**Sift** is a distraction-free note-taking extension designed for researchers, students, developers, and anyone who needs to capture thoughts while browsing. Unlike complex note management systems, this extension focuses on **speed, simplicity, and privacy**.
 
 Create notes that are tied to specific websites, minimize them to keep your workspace clean, and watch them reappear automatically when you revisit the page. Everything is stored locally in your browser—no accounts, no sync servers, no telemetry.
 
@@ -18,7 +18,7 @@ Create notes that are tied to specific websites, minimize them to keep your work
 ## Key Features
 
 ### 💚 Beautiful, Modern Design
-- Mint green color scheme inspired by modern design principles
+- Mint green color scheme inspired by Obsidian and modern design principles
 - Sleek, minimal interface with forest green accents
 - Smooth animations and polished interactions
 - Responsive and works on any website
@@ -83,7 +83,7 @@ Notes are automatically tied to the current URL. When you:
 
 This extension fills a specific niche in a crowded market. Here's how it compares:
 
-| Feature | My Personal Sticky Notes | Google Keep | Sticky Notes Plus | Beanote | Obsidian Clipper |
+| Feature | Sift | Google Keep | Sticky Notes Plus | Beanote | Obsidian Clipper |
 |---------|-------------------------|-------------|-------------------|---------|------------------|
 | **Local-only storage** | ✅ Yes | ❌ Cloud | ✅ Yes | ⚠️ Mixed | ⚠️ Sync required |
 | **Per-page persistence** | ✅ Yes | ❌ Global | ✅ Yes | ✅ Yes | ❌ No |
@@ -96,7 +96,7 @@ This extension fills a specific niche in a crowded market. Here's how it compare
 | **Minimize to tiny dots** | ✅ Yes | ❌ No | ⚠️ Dashboard | ❌ No | ❌ No |
 | **Price** | 🎉 Free | 💰 Free (limited) | 💰 Free/Premium | 💰 Free | 💰 Free/Premium |
 
-### Why Choose My Personal Sticky Notes?
+### Why Choose Sift?
 
 **For privacy enthusiasts:**
 - Nothing ever touches the internet. Your browser, your notes.
@@ -434,5 +434,6 @@ See [Roadmap](#roadmap--future-features) above.
 ---
 
 **Last Updated**: April 2026
+**Project Name**: Sift
 **Maintainer**: [Your Name/Team]
 **Status**: Active Development
