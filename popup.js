@@ -1,25 +1,42 @@
-// Load and display all sites with notes
-chrome.storage.local.get(null, (result) => {
-  displaySites(result);
-});
+const container = document.getElementById('sitesContainer');
+const searchInput = document.getElementById('searchInput');
 
-// Listen for storage changes (real-time updates if content.js modifies storage)
+const EMPTY_STATE_HTML = `
+  <div class="empty-state">
+    <div class="empty-icon">📝</div>
+    <p>No notes yet</p>
+    <small>Visit any website and click the green button to start annotating</small>
+  </div>
+`;
+
+function isNoteUrl(key) {
+  return key.startsWith('http://') || key.startsWith('https://');
+}
+
+// Escape user-controlled strings (URLs, note text) before inserting into HTML
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function refresh() {
+  chrome.storage.local.get(null, displaySites);
+}
+
+// Initial render
+refresh();
+
+// Re-render on any storage change (notes edited on a page, deletes, clears)
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === 'local') {
-    chrome.storage.local.get(null, (result) => {
-      displaySites(result);
-    });
-  }
+  if (areaName === 'local') refresh();
 });
 
 function displaySites(allData) {
-  const container = document.getElementById('sitesContainer');
-  const searchInput = document.getElementById('searchInput');
-  
-  // Filter out non-URL keys (if any)
-  const sites = Object.entries(allData).filter(([key]) => {
-    return key.startsWith('http://') || key.startsWith('https://');
-  });
+  const sites = Object.entries(allData).filter(([key]) => isNoteUrl(key));
 
   // Update stats
   document.getElementById('totalSites').textContent = sites.length;
@@ -27,127 +44,53 @@ function displaySites(allData) {
   document.getElementById('totalNotes').textContent = totalNotes;
 
   if (sites.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📝</div>
-        <p>No notes yet</p>
-        <small>Visit any website and click the green button to start annotating</small>
-      </div>
-    `;
+    container.innerHTML = EMPTY_STATE_HTML;
     return;
   }
 
-  // Render all sites
-  const siteElements = sites.map(([url, notes]) => createSiteElement(url, notes)).join('');
-  container.innerHTML = siteElements;
+  container.innerHTML = sites.map(([url, notes]) => createSiteElement(url, notes)).join('');
 
-  // Add event listeners to action buttons
-  document.querySelectorAll('.site-visit-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const url = btn.dataset.url;
-      chrome.tabs.create({ url, active: true });
-    });
-  });
-
-  document.querySelectorAll('.site-copy-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const url = btn.dataset.url;
-      navigator.clipboard.writeText(url).then(() => {
-        btn.textContent = '✓ Copied';
-        setTimeout(() => {
-          btn.innerHTML = '<span class="btn-icon">📋</span> Copy URL';
-        }, 2000);
-      });
-    });
-  });
-
-  document.querySelectorAll('.site-delete-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const url = btn.dataset.url;
-      if (confirm(`Delete all notes for ${new URL(url).hostname}?`)) {
-        chrome.storage.local.remove([url], () => {
-          chrome.storage.local.get(null, (result) => {
-            displaySites(result);
-          });
-        });
-      }
-    });
-  });
-
-  // Search functionality
-  searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase();
-    document.querySelectorAll('.site-item').forEach(item => {
-      const title = item.querySelector('.site-title').textContent.toLowerCase();
-      const url = item.querySelector('.site-url').textContent.toLowerCase();
-      const preview = item.querySelector('.site-preview')?.textContent.toLowerCase() || '';
-      
-      const matches = title.includes(query) || url.includes(query) || preview.includes(query);
-      item.style.display = matches ? 'block' : 'none';
-    });
-
-    // Show empty state if all filtered out
-    const visibleItems = Array.from(document.querySelectorAll('.site-item')).filter(
-      item => item.style.display !== 'none'
-    );
-    
-    if (visibleItems.length === 0 && query.length > 0) {
-      const existingEmpty = container.querySelector('.empty-state');
-      if (!existingEmpty) {
-        const emptyDiv = document.createElement('div');
-        emptyDiv.className = 'empty-state';
-        emptyDiv.innerHTML = `
-          <div class="empty-icon">🔍</div>
-          <p>No results for "${query}"</p>
-          <small>Try a different search</small>
-        `;
-        container.appendChild(emptyDiv);
-      }
-    }
-  });
+  // Keep the current search filter applied across re-renders
+  applySearchFilter();
 }
 
 function createSiteElement(url, notes) {
-  // Extract domain and title
-  let domain, hostname;
+  let hostname;
   try {
-    const urlObj = new URL(url);
-    domain = urlObj.hostname;
-    hostname = domain.replace('www.', '');
+    hostname = new URL(url).hostname.replace(/^www\./, '');
   } catch (e) {
-    domain = 'Unknown';
     hostname = 'Unknown';
   }
 
   const noteCount = Array.isArray(notes) ? notes.length : 0;
-  const notePreview = Array.isArray(notes) && notes.length > 0 
-    ? notes[0].text.substring(0, 80) + (notes[0].text.length > 80 ? '...' : '')
+  const firstText = noteCount > 0 && typeof notes[0].text === 'string' ? notes[0].text : '';
+  const notePreview = firstText
+    ? firstText.substring(0, 80) + (firstText.length > 80 ? '...' : '')
     : 'No content';
+
+  const safeUrl = escapeHtml(url);
 
   return `
     <div class="site-item">
       <div class="site-item-header">
         <div class="site-icon">🌐</div>
         <div class="site-info">
-          <div class="site-title">${hostname}</div>
-          <div class="site-url">${url}</div>
+          <div class="site-title">${escapeHtml(hostname)}</div>
+          <div class="site-url">${safeUrl}</div>
         </div>
         <div class="note-count">${noteCount}</div>
       </div>
-      
-      <div class="site-preview">${notePreview}</div>
-      
+
+      <div class="site-preview">${escapeHtml(notePreview)}</div>
+
       <div class="site-actions">
-        <button class="site-action-btn site-visit-btn" data-url="${url}">
+        <button class="site-action-btn site-visit-btn" data-url="${safeUrl}">
           <span class="btn-icon">🔗</span> Visit
         </button>
-        <button class="site-action-btn site-copy-btn" data-url="${url}">
+        <button class="site-action-btn site-copy-btn" data-url="${safeUrl}">
           <span class="btn-icon">📋</span> Copy URL
         </button>
-        <button class="site-action-btn site-delete-btn delete" data-url="${url}">
+        <button class="site-action-btn site-delete-btn delete" data-url="${safeUrl}">
           <span class="btn-icon">🗑️</span> Delete
         </button>
       </div>
@@ -155,28 +98,85 @@ function createSiteElement(url, notes) {
   `;
 }
 
+// One delegated listener handles Visit / Copy / Delete for every site row
+container.addEventListener('click', (e) => {
+  const btn = e.target.closest('.site-action-btn');
+  if (!btn) return;
+  e.stopPropagation();
+  const url = btn.dataset.url;
+
+  if (btn.classList.contains('site-visit-btn')) {
+    chrome.tabs.create({ url, active: true });
+  } else if (btn.classList.contains('site-copy-btn')) {
+    navigator.clipboard.writeText(url).then(() => {
+      btn.textContent = '✓ Copied';
+      setTimeout(() => {
+        btn.innerHTML = '<span class="btn-icon">📋</span> Copy URL';
+      }, 2000);
+    });
+  } else if (btn.classList.contains('site-delete-btn')) {
+    let hostname;
+    try {
+      hostname = new URL(url).hostname;
+    } catch (err) {
+      hostname = url;
+    }
+    if (confirm(`Delete all notes for ${hostname}?`)) {
+      chrome.storage.local.remove([url]); // onChanged listener re-renders
+    }
+  }
+});
+
+// Search functionality
+searchInput.addEventListener('input', applySearchFilter);
+
+function applySearchFilter() {
+  const query = searchInput.value.trim().toLowerCase();
+  let visibleCount = 0;
+
+  container.querySelectorAll('.site-item').forEach(item => {
+    const haystack = ['.site-title', '.site-url', '.site-preview']
+      .map(sel => item.querySelector(sel)?.textContent || '')
+      .join(' ')
+      .toLowerCase();
+    const matches = haystack.includes(query);
+    item.style.display = matches ? 'block' : 'none';
+    if (matches) visibleCount++;
+  });
+
+  // Show/update/remove the "no results" state as the query changes
+  let emptyDiv = container.querySelector('.search-empty');
+  if (visibleCount === 0 && query) {
+    if (!emptyDiv) {
+      emptyDiv = document.createElement('div');
+      emptyDiv.className = 'empty-state search-empty';
+      container.appendChild(emptyDiv);
+    }
+    emptyDiv.innerHTML = `
+      <div class="empty-icon">🔍</div>
+      <p>No results for "${escapeHtml(query)}"</p>
+      <small>Try a different search</small>
+    `;
+  } else if (emptyDiv) {
+    emptyDiv.remove();
+  }
+}
+
 // Export functionality
 document.getElementById('exportBtn').addEventListener('click', () => {
   chrome.storage.local.get(null, (allData) => {
-    // Filter to only URL keys
-    const notesData = Object.entries(allData).reduce((acc, [key, value]) => {
-      if (key.startsWith('http://') || key.startsWith('https://')) {
-        acc[key] = value;
-      }
-      return acc;
-    }, {});
+    const notesData = Object.fromEntries(
+      Object.entries(allData).filter(([key]) => isNoteUrl(key))
+    );
 
-    // Create JSON file
-    const dataStr = JSON.stringify(notesData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const dataBlob = new Blob([JSON.stringify(notesData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
-    
-    // Create download link
+
     const link = document.createElement('a');
     link.href = url;
     link.download = `notes-backup-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
-    
+
     URL.revokeObjectURL(url);
   });
 });
@@ -184,16 +184,6 @@ document.getElementById('exportBtn').addEventListener('click', () => {
 // Clear all functionality
 document.getElementById('clearBtn').addEventListener('click', () => {
   if (confirm('Are you sure? This will delete ALL notes from ALL sites. This cannot be undone.')) {
-    chrome.storage.local.clear(() => {
-      document.getElementById('sitesContainer').innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">📝</div>
-          <p>No notes yet</p>
-          <small>Visit any website and click the green button to start annotating</small>
-        </div>
-      `;
-      document.getElementById('totalSites').textContent = '0';
-      document.getElementById('totalNotes').textContent = '0';
-    });
+    chrome.storage.local.clear(); // onChanged listener re-renders
   }
 });

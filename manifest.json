@@ -4,8 +4,7 @@
   "version": "1.0",
   "description": "Annotate any website with beautiful, persistent sticky notes. Keep your research organized.",
   "permissions": [
-    "storage",
-    "tabs"
+    "storage"
   ],
   "content_scripts": [
     {
@@ -14,9 +13,18 @@
       "css": ["styles.css"]
     }
   ],
+  "icons": {
+    "16": "icon-16.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_title": "Sift - View all annotated sites",
-    "default_icon": "icon.svg"
+    "default_icon": {
+      "16": "icon-16.png",
+      "48": "icon-48.png",
+      "128": "icon-128.png"
+    }
   }
 }

@@ -1,16 +1,12 @@
 // 1. VARIABLES
 const currentUrl = window.location.href;
 let notes = []; // Array to store all note DOM elements
+let saveTimeout = null;
 
 // 2. INITIALIZATION - Load ALL notes for this URL when page opens
 chrome.storage.local.get([currentUrl], (result) => {
-  const savedNotes = result[currentUrl] || [];
-  
-  // Create all saved notes
-  savedNotes.forEach(noteData => {
-    createNote(noteData);
-  });
-  
+  (result[currentUrl] || []).forEach(createNote);
+
   // Always show button to allow adding more notes
   createFloatingButton();
 });
@@ -19,7 +15,7 @@ chrome.storage.local.get([currentUrl], (result) => {
 
 // Generate unique ID for each note
 function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
 }
 
 // Save all notes to storage
@@ -34,29 +30,34 @@ function saveAllNotes() {
   chrome.storage.local.set({ [currentUrl]: notesData });
 }
 
+// Coalesce rapid changes (e.g. typing) into a single storage write
+function scheduleSave() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveAllNotes, 300);
+}
+
 // 4. UI CREATION FUNCTIONS
 
 function createFloatingButton() {
   // Prevent duplicate buttons
   if (document.getElementById("my-extension-float-btn")) return;
-  
+
   const btn = document.createElement("div");
   btn.id = "my-extension-float-btn";
-  btn.innerHTML = "N";
-  
+  btn.textContent = "N";
+
   btn.onclick = () => {
     const btnRect = btn.getBoundingClientRect();
-    const newNoteTop = (btnRect.top + window.scrollY - 190) + "px"; // 30px above + 100px higher + 60px higher
-    const newNoteLeft = (btnRect.left + window.scrollX - 200) + "px"; // 100px to the left + 100px to the left
+    // Open the note above and to the left of the button, clamped on-screen
+    const newNoteTop = Math.max(10, btnRect.top + window.scrollY - 190) + "px";
+    const newNoteLeft = Math.max(10, btnRect.left + window.scrollX - 200) + "px";
 
-    // Create a new note with unique ID and default position
-    const newNoteData = {
+    createNote({
       id: generateId(),
       text: "",
       top: newNoteTop,
       left: newNoteLeft
-    };
-    createNote(newNoteData);
+    });
     saveAllNotes();
   };
 
@@ -66,60 +67,43 @@ function createFloatingButton() {
 function createNote(noteData) {
   // Guard against undefined/malformed input and provide sensible defaults
   const safeData = noteData && typeof noteData === 'object' ? noteData : {};
-  const { 
-    id = generateId(), 
-    text = "", 
-    top, 
+  const {
+    id = generateId(),
+    text = "",
+    top,
     left,
-    isCollapsed = false // Default to not collapsed
+    isCollapsed = false
   } = safeData;
 
-  // Create the main container (using class instead of ID for multiple notes)
+  // Create the main container (appearance lives in styles.css)
   const noteElement = document.createElement("div");
   noteElement.className = "my-extension-note";
   noteElement.dataset.noteId = id;
-  noteElement.style.top = top;
-  noteElement.style.left = left;
-  noteElement.style.position = "absolute"; // Ensure positioning works
-  noteElement.style.zIndex = 999999;
-  noteElement.style.width = "280px";
-  noteElement.style.boxShadow = "0 2px 8px rgba(0,0,0,0.2)";
-  noteElement.style.background = "#fcf687ff";
-  noteElement.style.borderRadius = "6px";
-  noteElement.style.overflow = "hidden";
-  noteElement.style.fontFamily = "sans-serif";
-  if (isCollapsed) {
-    noteElement.classList.add('collapsed');
-  }
+  if (top) noteElement.style.top = top;
+  if (left) noteElement.style.left = left;
+  if (isCollapsed) noteElement.classList.add('collapsed');
 
   // Create the header (for dragging)
   const header = document.createElement("div");
   header.className = "my-extension-header";
-  header.style.cursor = "move";
-  header.style.padding = "6px 8px";
-  header.style.display = "flex";
-  header.style.justifyContent = "flex-end";
-
-  // Create close button
-  const closeBtn = document.createElement("span");
-  closeBtn.className = "my-extension-close";
-  closeBtn.innerHTML = "X";
-  closeBtn.style.cursor = "pointer";
-  closeBtn.onclick = () => {
-    // Remove from notes array and DOM
-    notes = notes.filter(n => n !== noteElement);
-    noteElement.remove();
-    saveAllNotes();
-  };
 
   // Create minimize button
   const minBtn = document.createElement("span");
   minBtn.className = "my-extension-min";
-  minBtn.innerHTML = "-";
-  minBtn.style.cursor = "pointer";
+  minBtn.textContent = "-";
   minBtn.onclick = (e) => {
     e.stopPropagation(); // Prevent drag from minimizing/expanding
     noteElement.classList.toggle('collapsed');
+    saveAllNotes();
+  };
+
+  // Create close button
+  const closeBtn = document.createElement("span");
+  closeBtn.className = "my-extension-close";
+  closeBtn.textContent = "X";
+  closeBtn.onclick = () => {
+    notes = notes.filter(n => n !== noteElement);
+    noteElement.remove();
     saveAllNotes();
   };
 
@@ -128,17 +112,7 @@ function createNote(noteData) {
   textarea.className = "my-extension-textarea";
   textarea.value = text;
   textarea.placeholder = "Type your notes here...";
-  textarea.style.width = "100%";
-  textarea.style.boxSizing = "border-box";
-  textarea.style.border = "none";
-  textarea.style.padding = "8px";
-  textarea.style.resize = "none";
-  textarea.style.height = "160px";
-
-  // Save to storage whenever user types
-  textarea.addEventListener("input", () => {
-    saveAllNotes();
-  });
+  textarea.addEventListener("input", scheduleSave);
 
   // Assemble the pieces
   header.appendChild(minBtn);
@@ -150,11 +124,10 @@ function createNote(noteData) {
   // Track this note in our array
   notes.push(noteElement);
 
-  // Add click listener for collapsed state to expand
+  // Click a collapsed note to expand it
   noteElement.addEventListener('click', (e) => {
-    // Only expand if the note is collapsed
     if (noteElement.classList.contains('collapsed')) {
-      e.stopPropagation(); // Prevent drag-related events or other elements from reacting
+      e.stopPropagation();
       noteElement.classList.remove('collapsed');
       saveAllNotes();
     }
@@ -166,34 +139,27 @@ function createNote(noteData) {
 
 // 5. DRAG LOGIC
 function makeDraggable(element, dragHandle) {
-  let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-  dragHandle.onmousedown = dragMouseDown;
-
-  function dragMouseDown(e) {
-    e = e || window.event;
+  dragHandle.addEventListener('mousedown', (e) => {
     e.preventDefault();
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
-  }
+    let lastX = e.clientX;
+    let lastY = e.clientY;
 
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    element.style.top = (element.offsetTop - pos2) + "px";
-    element.style.left = (element.offsetLeft - pos1) + "px";
-  }
+    const onMove = (ev) => {
+      ev.preventDefault();
+      element.style.top = (element.offsetTop + ev.clientY - lastY) + "px";
+      element.style.left = (element.offsetLeft + ev.clientX - lastX) + "px";
+      lastX = ev.clientX;
+      lastY = ev.clientY;
+    };
 
-  function closeDragElement() {
-    document.onmouseup = null;
-    document.onmousemove = null;
-    // Save position when dragging ends
-    saveAllNotes();
-  }
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      // Save position when dragging ends
+      saveAllNotes();
+    };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
 }
